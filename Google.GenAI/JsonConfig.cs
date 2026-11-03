@@ -15,6 +15,7 @@
  */
 
 using System;
+using System.Runtime.CompilerServices;
 using System.Text.Json;
 using System.Text.Json.Serialization;
 using System.Text.Json.Serialization.Metadata;
@@ -61,12 +62,38 @@ namespace Google.GenAI
     /// Gets the source-generated TypeInfo for a given type T to ensure AOT compliance.
     /// </summary>
     internal static JsonTypeInfo<T> TypeInfo<T>(JsonSerializerOptions? options = null)
-        => (JsonTypeInfo<T>)(options ?? InternalSerializerOptions).GetTypeInfo(typeof(T));
+        => (JsonTypeInfo<T>)WithGeneratedContext(options).GetTypeInfo(typeof(T));
 
     /// <summary>
     /// Gets the source-generated TypeInfo for a given Type to ensure AOT compliance.
     /// </summary>
     internal static JsonTypeInfo TypeInfo(Type type, JsonSerializerOptions? options = null)
-        => (options ?? InternalSerializerOptions).GetTypeInfo(type);
+        => WithGeneratedContext(options).GetTypeInfo(type);
+
+    private static readonly ConditionalWeakTable<JsonSerializerOptions, JsonSerializerOptions> OptionsWithGeneratedContext = new();
+
+    /// <summary>
+    /// Returns caller-supplied options extended with <see cref="GenAIJsonContext"/>, so SDK types resolve
+    /// when the options have no resolver for them. The caller's instance is never modified. Options without
+    /// a resolver are returned as-is when reflection-based serialization is enabled.
+    /// </summary>
+    private static JsonSerializerOptions WithGeneratedContext(JsonSerializerOptions? options)
+    {
+      if (options == null)
+      {
+        return InternalSerializerOptions;
+      }
+      if ((options.TypeInfoResolver == null && JsonSerializer.IsReflectionEnabledByDefault) ||
+          options.TypeInfoResolverChain.Contains(GenAIJsonContext.Default))
+      {
+        return options;
+      }
+      return OptionsWithGeneratedContext.GetValue(options, static source =>
+      {
+        var extended = new JsonSerializerOptions(source);
+        extended.TypeInfoResolverChain.Add(GenAIJsonContext.Default);
+        return extended;
+      });
+    }
   }
 }

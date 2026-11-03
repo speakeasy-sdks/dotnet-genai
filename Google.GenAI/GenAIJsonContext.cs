@@ -107,6 +107,7 @@ namespace Google.GenAI
   [JsonSerializable(typeof(string))]
   [JsonSerializable(typeof(bool))]
   [JsonSerializable(typeof(Dictionary<string, object>))]
+  [JsonSerializable(typeof(List<object>))]
   [JsonSerializable(typeof(System.Text.Json.Nodes.JsonNode))]
   [JsonSerializable(typeof(System.Text.Json.Nodes.JsonObject))]
   [JsonSerializable(typeof(System.Text.Json.Nodes.JsonArray))]

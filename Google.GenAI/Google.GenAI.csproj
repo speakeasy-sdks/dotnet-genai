@@ -22,6 +22,7 @@
 
   <PropertyGroup Condition="'$(TargetFramework)' == 'net8.0'">
     <IsAotCompatible>true</IsAotCompatible>
+    <WarningsAsErrors>$(WarningsAsErrors);IL2026;IL2046;IL2057;IL2067;IL2070;IL2072;IL2075;IL2087;IL2091;IL3050;IL3051</WarningsAsErrors>
   </PropertyGroup>
 
   <PropertyGroup>
@@ -42,6 +43,7 @@
 
   <ItemGroup>
     <None Include="README.md" Pack="true" PackagePath="/" />
+    <None Include="buildTransitive/Google.GenAI.targets" Pack="true" PackagePath="buildTransitive/" />
   </ItemGroup>
 
 </Project>

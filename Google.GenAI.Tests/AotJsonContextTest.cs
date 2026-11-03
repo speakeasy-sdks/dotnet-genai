@@ -195,6 +195,37 @@ namespace Google.GenAI.Tests
     }
 
     /// <summary>
+    /// Verifies that collections commonly placed in object-typed properties, such as
+    /// FunctionResponse.Response, resolve without reflection.
+    /// </summary>
+    [TestMethod]
+    public void GenAIJsonContext_ResolvesObjectCollections()
+    {
+      Assert.IsNotNull(GenAIJsonContext.Default.GetTypeInfo(typeof(Dictionary<string, object>)));
+      Assert.IsNotNull(GenAIJsonContext.Default.GetTypeInfo(typeof(List<object>)));
+    }
+
+    /// <summary>
+    /// Verifies that SDK types resolve through GenAIJsonContext when caller-supplied options
+    /// carry a resolver that does not know them, without modifying the caller's options.
+    /// </summary>
+    [TestMethod]
+    public void FromJson_ResolvesSdkTypesWithCallerOptionsThatLackThem()
+    {
+      var options = new JsonSerializerOptions
+      {
+        PropertyNameCaseInsensitive = true,
+        TypeInfoResolver = JsonTypeInfoResolver.Combine(),
+      };
+      options.MakeReadOnly();
+
+      var content = Content.FromJson("{\"PARTS\":[{\"text\":\"Hello\"}]}", options);
+
+      Assert.AreEqual("Hello", content?.Parts?[0].Text);
+      Assert.AreEqual(0, options.TypeInfoResolverChain.Count);
+    }
+
+    /// <summary>
     /// Verifies that serializing and deserializing a realtime message round-trips correctly
     /// using only the source-generated context (no reflection fallback).
     /// </summary>

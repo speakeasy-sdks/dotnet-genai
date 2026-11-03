@@ -1,0 +1,26 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <OutputType>Exe</OutputType>
+    <TargetFramework>net8.0</TargetFramework>
+    <Nullable>enable</Nullable>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <PublishAot>true</PublishAot>
+    <InvariantGlobalization>true</InvariantGlobalization>
+    <IsPackable>false</IsPackable>
+    <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
+    <WarningsNotAsErrors>NU1900</WarningsNotAsErrors>
+    <!-- Report every trim/AOT warning against the member that causes it, so verify_aot.sh can attribute it. -->
+    <TrimmerSingleWarn>false</TrimmerSingleWarn>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="../../Google.GenAI/Google.GenAI.csproj" />
+    <!-- Analyze all of Google.GenAI, not only the code paths this app calls. -->
+    <TrimmerRootAssembly Include="Google.GenAI" />
+  </ItemGroup>
+
+  <!-- Project references do not apply the package's buildTransitive targets, so import them directly. -->
+  <Import Project="../../Google.GenAI/buildTransitive/Google.GenAI.targets" />
+
+</Project>
